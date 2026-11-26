@@ -1,0 +1,200 @@
+/* Modern Web Guidance: color-scheme on :root mapped to <meta name="color-scheme"> */
+:root {
+  color-scheme: light dark;
+
+  --target-size: 36px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  --font-sans: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Cascadia Mono', 'SFMono-Regular', ui-monospace, Consolas, monospace;
+
+  /* Light palette (Daytime outdoor glare resistance) */
+  --bg-canvas-light: #f4f5f2;
+  --bg-surface-light: #ffffff;
+  --bg-subtle-light: #e8ece6;
+  --bg-elevated-light: #fdfefd;
+  --text-primary-light: #10151c;
+  --text-muted-light: #47525e;
+  --border-strong-light: #8d99a6;
+  --border-subtle-light: #d0d7de;
+  --accent-light: #1649d8;
+  --accent-ink-light: #ffffff;
+  --accent-soft-light: #e7eeff;
+  --ok-light: #116b36;
+  --ok-soft-light: #e3f5ea;
+  --warn-light: #944600;
+  --warn-soft-light: #fef1d8;
+  --danger-light: #b41818;
+  --danger-soft-light: #fde7e7;
+  --cash-light: #116b36;
+  --cash-soft-light: #e3f5ea;
+  --upi-light: #0d5aa7;
+  --upi-soft-light: #e5f1fd;
+
+  /* Dark palette (Nighttime low-glare pit board) */
+  --bg-canvas-dark: #101318;
+  --bg-surface-dark: #181c23;
+  --bg-subtle-dark: #222833;
+  --bg-elevated-dark: #202631;
+  --text-primary-dark: #f2f4f8;
+  --text-muted-dark: #a6b2c2;
+  --border-strong-dark: #5c687c;
+  --border-subtle-dark: #2d3544;
+  --accent-dark: #74a5ff;
+  --accent-ink-dark: #0a1220;
+  --accent-soft-dark: #192947;
+  --ok-dark: #58d68d;
+  --ok-soft-dark: #122b1e;
+  --warn-dark: #f5b945;
+  --warn-soft-dark: #2f230b;
+  --danger-dark: #ff7f7f;
+  --danger-soft-dark: #38161a;
+  --cash-dark: #58d68d;
+  --cash-soft-dark: #122b1e;
+  --upi-dark: #7cb9ff;
+  --upi-soft-dark: #142840;
+
+  /* Fallback light defaults for browsers without light-dark() */
+  --bg-canvas: var(--bg-canvas-light);
+  --bg-surface: var(--bg-surface-light);
+  --bg-subtle: var(--bg-subtle-light);
+  --bg-elevated: var(--bg-elevated-light);
+  --text-primary: var(--text-primary-light);
+  --text-muted: var(--text-muted-light);
+  --border-strong: var(--border-strong-light);
+  --border-subtle: var(--border-subtle-light);
+  --accent: var(--accent-light);
+  --accent-ink: var(--accent-ink-light);
+  --accent-soft: var(--accent-soft-light);
+  --ok: var(--ok-light);
+  --ok-soft: var(--ok-soft-light);
+  --warn: var(--warn-light);
+  --warn-soft: var(--warn-soft-light);
+  --danger: var(--danger-light);
+  --danger-soft: var(--danger-soft-light);
+  --cash: var(--cash-light);
+  --cash-soft: var(--cash-soft-light);
+  --upi: var(--upi-light);
+  --upi-soft: var(--upi-soft-light);
+
+  --scrollbar-track: var(--bg-subtle);
+  --scrollbar-thumb: var(--border-strong);
+
+  &:has(> head > meta[name="color-scheme"][content="dark"]) {
+    color-scheme: dark;
+  }
+
+  &:has(> head > meta[name="color-scheme"][content="light"]) {
+    color-scheme: light;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(:has(> head > meta[name="color-scheme"][content="light"])) {
+    --bg-canvas: var(--bg-canvas-dark);
+    --bg-surface: var(--bg-surface-dark);
+    --bg-subtle: var(--bg-subtle-dark);
+    --bg-elevated: var(--bg-elevated-dark);
+    --text-primary: var(--text-primary-dark);
+    --text-muted: var(--text-muted-dark);
+    --border-strong: var(--border-strong-dark);
+    --border-subtle: var(--border-subtle-dark);
+    --accent: var(--accent-dark);
+    --accent-ink: var(--accent-ink-dark);
+    --accent-soft: var(--accent-soft-dark);
+    --ok: var(--ok-dark);
+    --ok-soft: var(--ok-soft-dark);
+    --warn: var(--warn-dark);
+    --warn-soft: var(--warn-soft-dark);
+    --danger: var(--danger-dark);
+    --danger-soft: var(--danger-soft-dark);
+    --cash: var(--cash-dark);
+    --cash-soft: var(--cash-soft-dark);
+    --upi: var(--upi-dark);
+    --upi-soft: var(--upi-soft-dark);
+  }
+}
+
+:root:has(> head > meta[name="color-scheme"][content="dark"]) {
+  --bg-canvas: var(--bg-canvas-dark);
+  --bg-surface: var(--bg-surface-dark);
+  --bg-subtle: var(--bg-subtle-dark);
+  --bg-elevated: var(--bg-elevated-dark);
+  --text-primary: var(--text-primary-dark);
+  --text-muted: var(--text-muted-dark);
+  --border-strong: var(--border-strong-dark);
+  --border-subtle: var(--border-subtle-dark);
+  --accent: var(--accent-dark);
+  --accent-ink: var(--accent-ink-dark);
+  --accent-soft: var(--accent-soft-dark);
+  --ok: var(--ok-dark);
+  --ok-soft: var(--ok-soft-dark);
+  --warn: var(--warn-dark);
+  --warn-soft: var(--warn-soft-dark);
+  --danger: var(--danger-dark);
+  --danger-soft: var(--danger-soft-dark);
+  --cash: var(--cash-dark);
+  --cash-soft: var(--cash-soft-dark);
+  --upi: var(--upi-dark);
+  --upi-soft: var(--upi-soft-dark);
+}
+
+@supports (color: light-dark(white, black)) {
+  :root {
+    --bg-canvas: light-dark(var(--bg-canvas-light), var(--bg-canvas-dark));
+    --bg-surface: light-dark(var(--bg-surface-light), var(--bg-surface-dark));
+    --bg-subtle: light-dark(var(--bg-subtle-light), var(--bg-subtle-dark));
+    --bg-elevated: light-dark(var(--bg-elevated-light), var(--bg-elevated-dark));
+    --text-primary: light-dark(var(--text-primary-light), var(--text-primary-dark));
+    --text-muted: light-dark(var(--text-muted-light), var(--text-muted-dark));
+    --border-strong: light-dark(var(--border-strong-light), var(--border-strong-dark));
+    --border-subtle: light-dark(var(--border-subtle-light), var(--border-subtle-dark));
+    --accent: light-dark(var(--accent-light), var(--accent-dark));
+    --accent-ink: light-dark(var(--accent-ink-light), var(--accent-ink-dark));
+    --accent-soft: light-dark(var(--accent-soft-light), var(--accent-soft-dark));
+    --ok: light-dark(var(--ok-light), var(--ok-dark));
+    --ok-soft: light-dark(var(--ok-soft-light), var(--ok-soft-dark));
+    --warn: light-dark(var(--warn-light), var(--warn-dark));
+    --warn-soft: light-dark(var(--warn-soft-light), var(--warn-soft-dark));
+    --danger: light-dark(var(--danger-light), var(--danger-dark));
+    --danger-soft: light-dark(var(--danger-soft-light), var(--danger-soft-dark));
+    --cash: light-dark(var(--cash-light), var(--cash-dark));
+    --cash-soft: light-dark(var(--cash-soft-light), var(--cash-soft-dark));
+    --upi: light-dark(var(--upi-light), var(--upi-dark));
+    --upi-soft: light-dark(var(--upi-soft-light), var(--upi-soft-dark));
+  }
+}
+
+@media (pointer: coarse) {
+  :root {
+    --target-size: 44px;
+  }
+}
+
+@media (forced-colors: active) {
+  :root {
+    --bg-canvas: Canvas;
+    --bg-surface: Canvas;
+    --bg-subtle: Canvas;
+    --bg-elevated: Canvas;
+    --text-primary: CanvasText;
+    --text-muted: GrayText;
+    --border-strong: CanvasText;
+    --border-subtle: GrayText;
+    --accent: Highlight;
+    --accent-ink: HighlightText;
+    --accent-soft: Canvas;
+    --ok: CanvasText;
+    --ok-soft: Canvas;
+    --warn: CanvasText;
+    --warn-soft: Canvas;
+    --danger: Highlight;
+    --danger-soft: Canvas;
+    --cash: CanvasText;
+    --cash-soft: Canvas;
+    --upi: CanvasText;
+    --upi-soft: Canvas;
+  }
+}

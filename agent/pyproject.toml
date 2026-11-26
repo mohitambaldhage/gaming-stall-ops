@@ -1,0 +1,9 @@
+[project]
+name = "gaming-stall-ops-agent"
+version = "1.0.0"
+description = "Google Antigravity SDK shift analyst for the Nov 28 gaming stall."
+requires-python = ">=3.11"
+dependencies = [
+    "google-antigravity>=0.1.24",
+    "pydantic>=2.0.0",
+]

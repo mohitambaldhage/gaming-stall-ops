@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      try {
+        var scheme = localStorage.getItem('color-scheme');
+        document.querySelector('meta[name="color-scheme"]').content =
+          scheme === 'light' || scheme === 'dark' ? scheme : 'light dark';
+      } catch {}
+    </script>
+    <title>Nov 28 Gaming Stall | Counter &amp; Timers</title>
+    <meta name="theme-color" content="#1649d8" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./styles/tokens.css" />
+    <link rel="stylesheet" href="./styles/app.css" />
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link visually-hidden">Skip to main content</a>
+
+    <div class="app-shell">
+      <header class="top-header">
+        <div class="brand-block">
+          <h1 id="stall-title" class="brand-title">Nov 28 Gaming Stall</h1>
+          <p id="stall-subtitle" class="brand-meta">7 laptops · ₹149 / 30 min · No pause</p>
+        </div>
+
+        <div class="header-actions">
+          <button type="button" id="sync-status-btn" class="icon-chip-btn">
+            <span id="sync-dot" class="sync-dot" data-state="local" aria-hidden="true"></span>
+            <span id="sync-status-label">Checking sync</span>
+          </button>
+
+          <button type="button" id="sound-toggle-btn" class="icon-chip-btn" aria-pressed="false">
+            <span id="sound-icon" aria-hidden="true">🔔</span>
+            <span id="sound-label">Chime On</span>
+          </button>
+
+          <button type="button" id="theme-toggle-btn" class="icon-chip-btn">
+            <span id="theme-icon" aria-hidden="true">◐</span>
+            <span id="theme-label">Day / Night</span>
+          </button>
+        </div>
+      </header>
+
+      <section class="counter-strip" aria-label="Live cash register and cross-check">
+        <div class="metrics-row">
+          <div class="metric-box">
+            <div class="metric-label">Money Received</div>
+            <div id="metric-collected" class="metric-value">₹0</div>
+            <div id="metric-method-split" class="metric-sub">0 Cash · 0 UPI</div>
+          </div>
+
+          <div class="metric-box">
+            <div class="metric-label">Slots Played</div>
+            <div id="metric-played" class="metric-value">0 slots</div>
+            <div id="metric-expected" class="metric-sub">Expected ₹0 · 0 active</div>
+          </div>
+
+          <div id="crosscheck-box" class="metric-box crosscheck-box" data-status="matched">
+            <div class="metric-label">Paper &amp; Slot Cross-Check</div>
+            <div id="metric-crosscheck" class="metric-value">Ready</div>
+            <div id="metric-crosscheck-detail" class="metric-sub">0 paid = 0 played</div>
+          </div>
+        </div>
+
+        <div class="quick-pay-row">
+          <button type="button" id="quick-cash-btn" class="btn btn-cash">
+            +1 Cash (₹149)
+          </button>
+          <button type="button" id="quick-upi-btn" class="btn btn-upi">
+            +1 UPI (₹149)
+          </button>
+          <button type="button" id="quick-undo-btn" class="btn btn-undo">
+            Undo Last Pay
+          </button>
+        </div>
+      </section>
+
+      <div class="tablist" role="tablist" aria-label="Counter views">
+        <button type="button" role="tab" id="tab-floor" aria-selected="true" tabindex="0" data-tab="floor">
+          Floor (<span id="floor-tab-count">7</span>)
+        </button>
+        <button type="button" role="tab" id="tab-rigs" aria-selected="false" tabindex="-1" data-tab="rigs">
+          Games &amp; Rigs
+        </button>
+        <button type="button" role="tab" id="tab-records" aria-selected="false" tabindex="-1" data-tab="records">
+          Records &amp; Math
+        </button>
+        <button type="button" role="tab" id="tab-sync" aria-selected="false" tabindex="-1" data-tab="sync">
+          Sync &amp; QR
+        </button>
+      </div>
+
+      <main id="main-content" tabindex="-1">
+        <!-- TAB 1: LIVE FLOOR -->
+        <section id="panel-floor" class="tab-panel" role="tabpanel" aria-labelledby="tab-floor">
+          <div class="section-bar">
+            <h2 class="section-heading">Active Laptops &amp; 30-Min Timers</h2>
+            <div class="header-actions">
+              <button type="button" id="test-chime-btn" class="btn btn-sm">Test Chime</button>
+              <button type="button" id="floor-add-laptop-btn" class="btn btn-sm">+ Add Laptop</button>
+            </div>
+          </div>
+          <div id="floor-grid" class="floor-grid"></div>
+        </section>
+
+        <!-- TAB 2: GAMES & RIGS -->
+        <section id="panel-rigs" class="tab-panel" role="tabpanel" aria-labelledby="tab-rigs" hidden>
+          <div class="section-bar">
+            <h2 class="section-heading">Laptop Inventory &amp; Game Finder</h2>
+            <button type="button" id="rigs-add-laptop-btn" class="btn btn-primary btn-sm">+ Add Laptop</button>
+          </div>
+          <div class="toolbar-row">
+            <label for="game-search-input" class="visually-hidden">Search game, owner, or GPU</label>
+            <input
+              id="game-search-input"
+              class="search-input"
+              type="search"
+              placeholder="Search game or owner (e.g. GTA 5, Silksong, Cyberpunk, Rohan)..."
+            />
+            <button type="button" id="clear-search-btn" class="btn btn-sm">Clear</button>
+          </div>
+          <div id="rigs-list" class="floor-grid"></div>
+        </section>
+
+        <!-- TAB 3: RECORDS & SHIFT MATH -->
+        <section id="panel-records" class="tab-panel" role="tabpanel" aria-labelledby="tab-records" hidden>
+          <div class="panel-box">
+            <h2>Shift Math &amp; Laptop Scaling Calculator</h2>
+            <p class="field-hint">
+              Calculate half-hour capacity across laptops (example: 7 realistic laptops for 3 hours, or 10 laptops at ₹1,490 per 30 min).
+            </p>
+            <div class="planner-controls">
+              <div class="field-group">
+                <label class="field-label" for="plan-laptops">Laptops count</label>
+                <input id="plan-laptops" class="field-input" type="number" min="1" max="30" value="7" />
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="plan-hours">Max stall hours</label>
+                <input id="plan-hours" class="field-input" type="number" min="0.5" max="16" step="0.5" value="3" />
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="plan-rate">Rate / 30 min (₹)</label>
+                <input id="plan-rate" class="field-input" type="number" min="1" max="10000" value="149" />
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="plan-occupancy">Realistic fill %</label>
+                <input id="plan-occupancy" class="field-input" type="number" min="10" max="100" step="5" value="100" />
+              </div>
+            </div>
+            <div id="planner-summary" class="notice-banner" style="margin-bottom: 0.75rem;"></div>
+            <div tabindex="0" role="region" aria-labelledby="scaling-caption" class="table-wrapper">
+              <table class="data-table">
+                <caption id="scaling-caption">Projected Revenue by Laptop Count &amp; Hours</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Laptops</th>
+                    <th scope="col" id="scaling-col-30m">30 min (1 slot)</th>
+                    <th scope="col" id="scaling-col-1h">1 hr (2 slots)</th>
+                    <th scope="col" id="scaling-col-2h">2 hrs (4 slots)</th>
+                    <th scope="col" id="scaling-col-3h">3 hrs (6 slots)</th>
+                  </tr>
+                </thead>
+                <tbody id="scaling-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel-box">
+            <h2>Laptop-by-Laptop Record Summary</h2>
+            <div tabindex="0" role="region" aria-labelledby="rig-breakdown-caption" class="table-wrapper">
+              <table class="data-table stack-mobile">
+                <caption id="rig-breakdown-caption">Live slots and expected earnings per laptop</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Laptop</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Sessions</th>
+                    <th scope="col">Slots Played</th>
+                    <th scope="col">Expected Revenue</th>
+                  </tr>
+                </thead>
+                <tbody id="rig-breakdown-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel-box">
+            <div class="section-bar">
+              <h2>Payment Ledger (Paper Reconciliation)</h2>
+              <div class="header-actions no-print">
+                <button type="button" id="export-csv-btn" class="btn btn-sm">Export CSV</button>
+                <button type="button" id="print-records-btn" class="btn btn-sm">Print Sheet</button>
+              </div>
+            </div>
+            <div class="toolbar-row no-print">
+              <label for="payment-filter-select" class="field-label">Filter:</label>
+              <select id="payment-filter-select" class="field-select">
+                <option value="all">All payments</option>
+                <option value="cash">Cash only</option>
+                <option value="upi">UPI only</option>
+                <option value="unchecked">Not ticked on paper</option>
+              </select>
+            </div>
+            <div tabindex="0" role="region" aria-labelledby="payments-caption" class="table-wrapper">
+              <table id="payments-table" class="data-table stack-mobile">
+                <caption id="payments-caption">Click Paper Check as you verify against your paper sheet</caption>
+                <thead>
+                  <tr>
+                    <th scope="col" data-type="number" aria-sort="descending">
+                      <button type="button" class="sort-btn" data-col="0">
+                        <span>Slip #</span>
+                        <span class="sort-icon" aria-hidden="true"></span>
+                      </button>
+                    </th>
+                    <th scope="col" data-type="number">
+                      <button type="button" class="sort-btn" data-col="1">
+                        <span>Time</span>
+                        <span class="sort-icon" aria-hidden="true"></span>
+                      </button>
+                    </th>
+                    <th scope="col" data-type="text">
+                      <button type="button" class="sort-btn" data-col="2">
+                        <span>Method</span>
+                        <span class="sort-icon" aria-hidden="true"></span>
+                      </button>
+                    </th>
+                    <th scope="col" data-type="number">
+                      <button type="button" class="sort-btn" data-col="3">
+                        <span>Amount</span>
+                        <span class="sort-icon" aria-hidden="true"></span>
+                      </button>
+                    </th>
+                    <th scope="col">Laptop / Note</th>
+                    <th scope="col">Paper</th>
+                    <th scope="col" class="no-print">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="payments-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel-box">
+            <h2>Session Log (Players Who Played)</h2>
+            <div tabindex="0" role="region" aria-labelledby="sessions-caption" class="table-wrapper">
+              <table id="sessions-table" class="data-table stack-mobile">
+                <caption id="sessions-caption">Every 30-minute slot started across laptops</caption>
+                <thead>
+                  <tr>
+                    <th scope="col" data-type="number" aria-sort="descending">
+                      <button type="button" class="sort-btn" data-col="0">
+                        <span>Player #</span>
+                        <span class="sort-icon" aria-hidden="true"></span>
+                      </button>
+                    </th>
+                    <th scope="col" data-type="number">
+                      <button type="button" class="sort-btn" data-col="1">
+                        <span>Started</span>
+                        <span class="sort-icon" aria-hidden="true"></span>
+                      </button>
+                    </th>
+                    <th scope="col" data-type="text">
+                      <button type="button" class="sort-btn" data-col="2">
+                        <span>Laptop</span>
+                        <span class="sort-icon" aria-hidden="true"></span>
+                      </button>
+                    </th>
+                    <th scope="col" data-type="text">
+                      <button type="button" class="sort-btn" data-col="3">
+                        <span>Game</span>
+                        <span class="sort-icon" aria-hidden="true"></span>
+                      </button>
+                    </th>
+                    <th scope="col" data-type="number">
+                      <button type="button" class="sort-btn" data-col="4">
+                        <span>Slots</span>
+                        <span class="sort-icon" aria-hidden="true"></span>
+                      </button>
+                    </th>
+                    <th scope="col" data-type="number">
+                      <button type="button" class="sort-btn" data-col="5">
+                        <span>Expected</span>
+                        <span class="sort-icon" aria-hidden="true"></span>
+                      </button>
+                    </th>
+                    <th scope="col">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="sessions-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel-box no-print">
+            <h2>Antigravity SDK Shift Analyst</h2>
+            <p class="field-hint">
+              Runs the optional Python agent (<code>google-antigravity</code>) against your live database to reconcile paper gaps, Cash vs UPI split, and top games.
+            </p>
+            <div class="toolbar-row">
+              <label for="ai-question-input" class="visually-hidden">Question for shift analyst</label>
+              <input
+                id="ai-question-input"
+                class="search-input"
+                type="text"
+                placeholder="Optional question (leave blank for full shift summary)..."
+              />
+              <button type="button" id="run-ai-brief-btn" class="btn btn-primary btn-sm">
+                Generate Brief
+              </button>
+            </div>
+            <div id="ai-brief-output" class="ai-output" hidden></div>
+          </div>
+        </section>
+
+        <!-- TAB 4: PHONE SYNC & HOSTING -->
+        <section id="panel-sync" class="tab-panel" role="tabpanel" aria-labelledby="tab-sync" hidden>
+          <div class="sync-grid">
+            <div class="panel-box">
+              <h2>Open on Phone (QR &amp; Network URLs)</h2>
+              <div id="sync-error-banner" class="notice-banner" hidden style="margin-bottom: 0.65rem;"></div>
+              <p class="field-hint" id="sync-mode-desc"></p>
+              <div id="qr-container"></div>
+              <ul id="network-url-list" class="url-list"></ul>
+              <p class="field-hint">
+                Different Wi-Fi or 5G? Start a tunnel on the host laptop with <code>npm run tunnel</code>, then paste the HTTPS URL into Remote Sync on your phone or open the tunnel URL directly.
+              </p>
+            </div>
+
+            <div class="panel-box">
+              <h2>Live Multi-Device Sync Settings</h2>
+              <form id="sync-config-form" class="field-group" style="gap: 0.65rem;">
+                <div class="field-group">
+                  <label class="field-label" for="sync-mode-select">Storage / Sync Mode</label>
+                  <select id="sync-mode-select" class="field-select">
+                    <option value="auto">Auto (Local server if open, else Cloud/Phone)</option>
+                    <option value="server">Server / Tunnel URL (live SQLite + SSE)</option>
+                    <option value="firebase">Firebase Realtime DB URL (works from github.io)</option>
+                    <option value="local">Phone Browser Only (IndexedDB offline)</option>
+                  </select>
+                </div>
+
+                <div class="field-group">
+                  <label class="field-label" for="sync-server-url">Remote Server / Tunnel URL (optional)</label>
+                  <input
+                    id="sync-server-url"
+                    class="field-input"
+                    type="url"
+                    placeholder="https://your-stall.trycloudflare.com"
+                  />
+                </div>
+
+                <div class="field-group">
+                  <label class="field-label" for="sync-firebase-url">Firebase Realtime DB URL (optional for github.io live sync)</label>
+                  <input
+                    id="sync-firebase-url"
+                    class="field-input"
+                    type="url"
+                    placeholder="https://your-project-default-rtdb.firebaseio.com"
+                  />
+                </div>
+
+                <div class="field-group">
+                  <label class="field-label" for="sync-pin-input">Operator PIN (only if STALL_PIN is set)</label>
+                  <input
+                    id="sync-pin-input"
+                    class="field-input"
+                    type="password"
+                    autocomplete="off"
+                    placeholder="Leave blank if no PIN set"
+                  />
+                </div>
+
+                <div class="header-actions">
+                  <button type="submit" class="btn btn-primary btn-sm">Save &amp; Reconnect</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="panel-box">
+            <h2>Stall Settings &amp; Backups</h2>
+            <form id="settings-form" class="planner-controls">
+              <div class="field-group">
+                <label class="field-label" for="setting-stall-name">Stall Name</label>
+                <input id="setting-stall-name" class="field-input" type="text" required />
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="setting-rate">Rate / Block (₹)</label>
+                <input id="setting-rate" class="field-input" type="number" min="1" max="10000" required />
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="setting-mins">Block Minutes</label>
+                <input id="setting-mins" class="field-input" type="number" min="1" max="240" required />
+              </div>
+              <div class="field-group" style="align-self: end;">
+                <button type="submit" class="btn btn-primary btn-sm">Save Settings</button>
+              </div>
+            </form>
+
+            <div class="header-actions">
+              <button type="button" id="export-json-btn" class="btn btn-sm">Download Backup JSON</button>
+              <label class="btn btn-sm" for="import-json-input">
+                Restore JSON
+                <input id="import-json-input" type="file" accept="application/json,.json" hidden />
+              </label>
+              <button type="button" id="reset-day-btn" class="btn btn-danger btn-sm">
+                Reset Test Sessions &amp; Payments
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- START SESSION DIALOG -->
+    <dialog id="start-session-dialog" aria-labelledby="start-dialog-title" closedby="any">
+      <div class="dialog-head">
+        <h1 id="start-dialog-title" class="dialog-title">Start 30-Min Session</h1>
+        <button type="button" class="btn btn-sm" data-close-dialog="start-session-dialog" aria-label="Close">✕</button>
+      </div>
+      <div id="start-session-notice" class="notice-banner">
+        30:00 timer starts immediately. No pause rule applies.
+      </div>
+      <form id="start-session-form" class="field-group" style="gap: 0.7rem;">
+        <input type="hidden" id="start-laptop-id" />
+        <div class="field-group">
+          <span class="field-label">Pick Game on <strong id="start-laptop-label"></strong></span>
+          <div id="start-game-chips" class="game-pick-grid"></div>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="start-game-custom">Or enter game title</label>
+          <input id="start-game-custom" class="field-input" type="text" required placeholder="Type or tap game above" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="start-player-name">Player Name (optional)</label>
+          <input id="start-player-name" class="field-input" type="text" placeholder="Leave blank for Player #N" />
+        </div>
+        <div class="field-group">
+          <span class="field-label">Payment at Start</span>
+          <div class="radio-cards">
+            <label class="radio-card">
+              <input type="radio" name="start-pay" value="cash" />
+              <span>Cash ₹149</span>
+            </label>
+            <label class="radio-card">
+              <input type="radio" name="start-pay" value="upi" />
+              <span>UPI ₹149</span>
+            </label>
+            <label class="radio-card">
+              <input type="radio" name="start-pay" value="unpaid" checked />
+              <span>Pay Later</span>
+            </label>
+          </div>
+        </div>
+        <div class="dialog-actions">
+          <button type="button" class="btn" data-close-dialog="start-session-dialog">Cancel</button>
+          <button type="submit" id="start-session-submit" class="btn btn-primary" autofocus>Start 30:00 Timer</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- EXTEND BLOCK DIALOG -->
+    <dialog id="extend-session-dialog" aria-labelledby="extend-dialog-title" closedby="any">
+      <div class="dialog-head">
+        <h1 id="extend-dialog-title" class="dialog-title">Add +30 Min Block</h1>
+        <button type="button" class="btn btn-sm" data-close-dialog="extend-session-dialog" aria-label="Close">✕</button>
+      </div>
+      <p id="extend-session-summary" class="field-hint"></p>
+      <form id="extend-session-form" class="field-group" style="gap: 0.7rem;">
+        <input type="hidden" id="extend-session-id" />
+        <div class="field-group">
+          <span id="extend-pay-label" class="field-label">Payment for +30 min</span>
+          <div class="radio-cards">
+            <label class="radio-card">
+              <input type="radio" name="extend-pay" value="cash" checked />
+              <span>Cash ₹149</span>
+            </label>
+            <label class="radio-card">
+              <input type="radio" name="extend-pay" value="upi" />
+              <span>UPI ₹149</span>
+            </label>
+            <label class="radio-card">
+              <input type="radio" name="extend-pay" value="unpaid" />
+              <span>Collect Later</span>
+            </label>
+          </div>
+        </div>
+        <div class="dialog-actions">
+          <button type="button" class="btn" data-close-dialog="extend-session-dialog">Cancel</button>
+          <button type="submit" id="extend-session-submit" class="btn btn-primary" autofocus>Add +30m</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- EDIT LAPTOP DIALOG -->
+    <dialog id="edit-laptop-dialog" aria-labelledby="edit-laptop-dialog-title" closedby="any">
+      <div class="dialog-head">
+        <h1 id="edit-laptop-dialog-title" class="dialog-title">Edit Laptop &amp; Games</h1>
+        <button type="button" class="btn btn-sm" data-close-dialog="edit-laptop-dialog" aria-label="Close">✕</button>
+      </div>
+      <form id="edit-laptop-form" class="field-group" style="gap: 0.65rem;">
+        <input type="hidden" id="edit-laptop-id" />
+        <div class="field-group">
+          <label class="field-label" for="edit-laptop-code">Short Code</label>
+          <input id="edit-laptop-code" class="field-input" type="text" required />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="edit-laptop-owner">Owner Name</label>
+          <input id="edit-laptop-owner" class="field-input" type="text" required />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="edit-laptop-ownership">Ownership</label>
+          <select id="edit-laptop-ownership" class="field-select">
+            <option value="Friend">Friend</option>
+            <option value="Mine">Mine</option>
+            <option value="Rented">Rented</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="edit-laptop-specs">Specs (GPU, CPU, RAM)</label>
+          <input id="edit-laptop-specs" class="field-input" type="text" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="edit-laptop-notes">Notes</label>
+          <input id="edit-laptop-notes" class="field-input" type="text" placeholder="Optional stall notes" />
+        </div>
+        <label class="radio-card">
+          <input type="checkbox" id="edit-laptop-active" checked />
+          <span>Active on Floor today</span>
+        </label>
+        <div class="field-group">
+          <span class="field-label">Remove mistyped games (tap ✕)</span>
+          <div id="edit-laptop-games-list" class="game-pills"></div>
+        </div>
+        <div class="dialog-actions">
+          <button type="button" class="btn" data-close-dialog="edit-laptop-dialog">Cancel</button>
+          <button type="submit" class="btn btn-primary" autofocus>Save Changes</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- ADD / EDIT LAPTOP DIALOG -->
+    <dialog id="add-laptop-dialog" aria-labelledby="laptop-dialog-title" closedby="any">
+      <div class="dialog-head">
+        <h1 id="laptop-dialog-title" class="dialog-title">Add Laptop</h1>
+        <button type="button" class="btn btn-sm" data-close-dialog="add-laptop-dialog" aria-label="Close">✕</button>
+      </div>
+      <form id="add-laptop-form" class="field-group" style="gap: 0.65rem;">
+        <div class="field-group">
+          <label class="field-label" for="new-laptop-code">Short Code (e.g. L8)</label>
+          <input id="new-laptop-code" class="field-input" type="text" placeholder="Auto (L8, L9...)" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="new-laptop-owner">Owner Name</label>
+          <input id="new-laptop-owner" class="field-input" type="text" required placeholder="Friend's name" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="new-laptop-ownership">Ownership</label>
+          <select id="new-laptop-ownership" class="field-select">
+            <option value="Friend">Friend</option>
+            <option value="Mine">Mine</option>
+            <option value="Rented">Rented</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="new-laptop-specs">Specs (GPU, CPU, RAM)</label>
+          <input id="new-laptop-specs" class="field-input" type="text" placeholder="e.g. RTX 4060 · Ryzen 7 · 16 GB RAM" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="new-laptop-games">Games (comma-separated)</label>
+          <textarea id="new-laptop-games" class="field-input" rows="2" placeholder="GTA 5, Valorant, Minecraft, Forza Horizon 6"></textarea>
+        </div>
+        <div class="dialog-actions">
+          <button type="button" class="btn" data-close-dialog="add-laptop-dialog">Cancel</button>
+          <button type="submit" class="btn btn-primary" autofocus>Save Laptop</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- ADD GAME TO LAPTOP DIALOG -->
+    <dialog id="add-game-dialog" aria-labelledby="game-dialog-title" closedby="any">
+      <div class="dialog-head">
+        <h1 id="game-dialog-title" class="dialog-title">Add Game to Laptop</h1>
+        <button type="button" class="btn btn-sm" data-close-dialog="add-game-dialog" aria-label="Close">✕</button>
+      </div>
+      <form id="add-game-form" class="field-group" style="gap: 0.65rem;">
+        <input type="hidden" id="add-game-laptop-id" />
+        <p id="add-game-laptop-name" class="field-hint"></p>
+        <div class="field-group">
+          <label class="field-label" for="new-game-title">Game Title</label>
+          <input id="new-game-title" class="field-input" type="text" required placeholder="e.g. FIFA 25, Tekken 8" />
+        </div>
+        <label class="radio-card">
+          <input type="checkbox" id="new-game-installed" checked />
+          <span>Already installed &amp; ready</span>
+        </label>
+        <div class="dialog-actions">
+          <button type="button" class="btn" data-close-dialog="add-game-dialog">Cancel</button>
+          <button type="submit" class="btn btn-primary" autofocus>Add Game</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- CONFIRM DIALOG -->
+    <dialog id="confirm-dialog" aria-labelledby="confirm-dialog-title" closedby="closerequest">
+      <h1 id="confirm-dialog-title" class="dialog-title">Confirm Action</h1>
+      <p id="confirm-dialog-message" class="field-hint"></p>
+      <form method="dialog" class="dialog-actions">
+        <button value="cancel" class="btn" autofocus>Cancel</button>
+        <button value="confirm" id="confirm-dialog-ok" class="btn btn-danger">Confirm</button>
+      </form>
+    </dialog>
+
+    <div id="live-announcer" class="visually-hidden" aria-live="polite"></div>
+    <div id="toast-stack" class="toast-stack" role="region" aria-label="Notifications"></div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

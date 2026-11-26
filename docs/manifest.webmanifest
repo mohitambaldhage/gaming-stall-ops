@@ -1,0 +1,9 @@
+{
+  "name": "Nov 28 Gaming Stall",
+  "short_name": "Stall Ops",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f5f2",
+  "theme_color": "#1649d8",
+  "description": "Phone-first counter, 30-min laptop timers, game finder, and Cash/UPI cross-check."
+}
